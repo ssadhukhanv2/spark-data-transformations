@@ -138,3 +138,12 @@
         survey_df_with_parsed_gender_with_sql_expr=survey_df.withColumn("Gender",expr("parse_gender_udf(Gender)"))
   
         survey_df_with_parsed_gender_with_sql_expr.select("Age","Gender","Country","State").show(n=5)
+
+* [**Miscellaneous Transformations**](https://www.udemy.com/course/apache-spark-programming-in-python-for-beginners/learn/lecture/20702078#questions)
+  * Create Dataframe manually 
+  * Add a monotonically increasing id as a column[**monotonically_increasing_id()**](https://spark.apache.org/docs/3.1.3/api/python/reference/api/pyspark.sql.functions.monotonically_increasing_id.html) monotonically_increasing_id() generates an ID that is guaranteed to be unique monotonically increasing but not consecutive. We can use it to create keys if keys are not present
+  * Using case for data transformation
+  * Casting Columns to a specific Type
+  * Adding new Column to the dataframe
+  * Dropping unnecessary columns from dataframe
+  * Sorting dataframe in ascending or descending order

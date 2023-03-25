@@ -39,7 +39,8 @@ if __name__ == '__main__':
                                                                 enable_hive_support=False)
 
     # transformations.analyse_log_files(spark_session=spark_session, log_file_path="data/apache_logs.txt")
-    transformations.transform_survey_data_using_udf(spark_session=spark_session,data_file_path="data/survey.csv")
+    # transformations.transform_survey_data_using_udf(spark_session=spark_session,data_file_path="data/survey.csv")
+    transformations.miscellaneous_dataframe_transformations(spark_session)
     utils.stop_spark_session(spark_session)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
