@@ -77,7 +77,7 @@
    * Manually Creating Rows and Dataframes:
    * Collecting Dataframe rows to driver
    * Work with an individual row in Spark Transformation
-* [Manually Create DataFrames from SparkRDD and Row](https://www.udemy.com/course/apache-spark-programming-in-python-for-beginners/learn/lecture/20554784#overview) Create DataFrames manually using Row, SparkRDD using [.parallelize()](https://sparkbyexamples.com/spark/how-to-create-an-rdd-using-parallelize/) and Row
+* [**Manually Create DataFrames from SparkRDD and Row**](https://www.udemy.com/course/apache-spark-programming-in-python-for-beginners/learn/lecture/20554784#overview) Create DataFrames manually using Row, SparkRDD using [.parallelize()](https://sparkbyexamples.com/spark/how-to-create-an-rdd-using-parallelize/) and Row
 
       my_schema=StructType([StructField("ID",StringType()),StructField("EventDate",StringType())])
         
@@ -87,4 +87,54 @@
   
       my_df=spark.createDataFrame(my_rdd,my_schema)
 
-* [Collecting Dataframe rows to Driver](https://www.udemy.com/course/apache-spark-programming-in-python-for-beginners/learn/lecture/20554784#overview)
+* [**Collecting Dataframe rows to Driver**](https://www.udemy.com/course/apache-spark-programming-in-python-for-beginners/learn/lecture/20554784#overview) `my_df` is just a reference to the data sitting in the driver, so within the test we need to explicitly call the .collect() method to collect the rows and bring it to the driver so that we can assert them
+        
+        rows = utils.to_date_df(dataframe=self.my_df, date_format="M/d/y", column_name="EventDate").collect()
+        for row in rows:
+            self.assertIsInstance(row["EventDate"], date) 
+
+* [**Work with Dataframe Rows with UnStructured Data**](https://www.udemy.com/course/apache-spark-programming-in-python-for-beginners/learn/lecture/20585510#overview)
+
+* [**Working with Columns**](https://www.udemy.com/course/apache-spark-programming-in-python-for-beginners/learn/lecture/20601288#questions/14666548) We may work with columns either using the `Column String` or the `Column Object`.
+
+      from pyspark.sql.functions import *
+      # Read data into DataFrame 
+      airlinesDF=spark.read \
+        .format("csv") \
+        .option("header","true") \
+        .option("inferSchema","true") \
+        .option("samplingRatio","0.0001") \
+        .load("/databricks-datasets/airlines/part-00000")
+      
+  * Select Columns using `Column String`
+      
+         airlinesDF.select("Origin","Dest","Distance","FlightNum").show(10)
+         # Combine the rows
+         airlinesDF.select("Origin","Dest", "Distance","Year","Month","DayofMonth").show(10)
+
+  * Select Columns using `Column Object` (`col`,`column` are essentially same)
+
+         airlinesDF.select(column("Origin"),col("Dest"),"Distance", column("FlightNum")).show()
+         # Combine the rows
+         airlinesDF.selectExpr("Origin", "Dest", "Distance", "to_date(concat(Year,Month,DayofMonth),'yyyyMMdd') as FlightDate").show(10)
+  
+  * We may even choose to use column object and column Strings in the same transformation
+
+         from pyspark.sql.functions import *
+         airlinesDF.select(column("Origin"),"Dest","Distance", column("FlightNum")).show()
+* [**Using User Defined Functions**](https://www.udemy.com/course/apache-spark-programming-in-python-for-beginners/learn/lecture/20655744#questions/14666548) We may want to write custom python functions and want to use them to transform columns data. There are two approaches of doing this.
+  * Creating a simple python function and using it as an udf. Here utils.parse_gender is registered as udf, which is used in the column transformation
+
+        parse_gender_udf = udf(utils.parse_gender, returnType=StringType())
+  
+        survey_df_with_parsed_gender = survey_df.withColumn("Gender", parse_gender_udf("Gender"))
+  
+        survey_df_with_parsed_gender.select("Age","Gender","Country","State").show(n=5)
+
+  * Another way of using udfs is to use them in sql expressions, but this involves registering the udf to the catalog
+
+        spark_session.udf.register("parse_gender_udf", utils.parse_gender, StringType())
+  
+        survey_df_with_parsed_gender_with_sql_expr=survey_df.withColumn("Gender",expr("parse_gender_udf(Gender)"))
+  
+        survey_df_with_parsed_gender_with_sql_expr.select("Age","Gender","Country","State").show(n=5)

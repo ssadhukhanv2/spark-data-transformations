@@ -19,6 +19,11 @@ class RowDemoTestCase(TestCase):
         cls.my_df = cls.spark_session.createDataFrame(my_rdd, my_schema)
 
     def test_data_type(self):
+
+        # my_df is just a reference to the data sitting in the driver, so we need to
+        # explicitly call the .collect() method to collect the rows and
+        # bring it to the driver so that we can assert them
+
         rows = utils.to_date_df(dataframe=self.my_df, date_format="M/d/y", column_name="EventDate").collect()
         for row in rows:
             self.assertIsInstance(row["EventDate"], date)

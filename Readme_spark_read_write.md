@@ -158,3 +158,4 @@
         *  If we drop an unmanaged table, it drops the metadata, the data files in teh external location remains as is.
         * Used for reusing existing data within spark.
   * **Advantages of using Spark Database Tables over simply processing data using raw data files** Spark Tables can be accessed using the JDBC/ODBC connector, so if we store the data in spark database, this will allow other tools like PowerBi and Table to connect to the spark database and allow accessing them. 
+     

@@ -3,6 +3,7 @@ import configparser
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import to_date
+import re
 
 
 def read_spark_config(config_file_location):
@@ -36,3 +37,26 @@ def stop_spark_session(spark_session):
 
 def to_date_df(dataframe, date_format, column_name):
     return dataframe.withColumn(column_name, to_date(column_name, date_format))
+
+
+def parse_gender(gender):
+    # This will be registered as a User Defined Function(UDF), given the value in the gender column
+    # it provides a standardized format to the gender
+
+    # Returns "Female" if female_pattern matches
+    # Returns "Male" if male_pattern matches
+
+    # "^f$|f.m|w.m" contains patterns to infer the female gender, the patterns are combined using or(|)
+    #   ^f$ -> matches words starting and ending with "f". This means it will match "f"
+    #   f.m -> matches words with having single character between f and m like "fem" in "female"
+    #   w.m -> matches words with having single character between w and m like "wom" in "woman", "women"
+    female_pattern = r"^f$|f.m|w.m"
+    # same with as female pattern
+    male_pattern = r"^m$|ma|m.l"
+
+    if re.search(female_pattern, gender.lower()):
+        return "Female"
+    elif re.search(male_pattern, gender.lower()):
+        return "Male"
+    else:
+        return "Unknown"
